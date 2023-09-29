@@ -1,22 +1,93 @@
+import requests
+from bs4 import BeautifulSoup
+from collections.abc import Iterable
+
+
 def formatStar(tdNumber):
     if tdNumber[0] == 0:
-        return "name", tdNumber[1].text
+        hrefs = tdNumber[1].find_all("a")
+        images = getImages("https://en.wikipedia.org" + hrefs[0].attrs["href"])
+        return "name", tdNumber[1].text, images
     if tdNumber[0] == 1:
-        return "distance", tdNumber[1].text
+        return "distance", tdNumber[1].text, None
     if tdNumber[0] == 2:
-        return "constelation", tdNumber[1].text
+        return "constelation", tdNumber[1].text, None
     if tdNumber[0] == 3:
-        return "coordinates", tdNumber[1].text
+        return "coordinates", tdNumber[1].text, None
     if tdNumber[0] == 4:
-        return "stellarClass", tdNumber[1].text
+        return "stellarClass", tdNumber[1].text, None
     if tdNumber[0] == 5:
-        return "solarMass", tdNumber[1].text
+        return "solarMass", tdNumber[1].text, None
     if tdNumber[0] == 6:
-        return "apparentMagnitude", tdNumber[1].text
+        return "apparentMagnitude", tdNumber[1].text, None
     if tdNumber[0] == 7:
-        return "absoluteMagnitude", tdNumber[1].text
+        return "absoluteMagnitude", tdNumber[1].text, None
     if tdNumber[0] == 8:
-        return "stellarParallax", tdNumber[1].text
+        return "stellarParallax", tdNumber[1].text, None
     if tdNumber[0] == 9:
-        return "notes", tdNumber[1].text
-    return "none", 0
+        return "notes", tdNumber[1].text, None
+    return "none", 0, None
+
+
+def getImages(link):
+    page = requests.get(link)
+    soup = BeautifulSoup(page.content, "html.parser")
+    figures = soup.findAll("figure")
+    images = []
+    # print("-------------" + link + "-----------------")
+
+    mainTable = soup.find("table", class_="infobox")
+    tds = mainTable.find("td")
+    divFigures = tds.find(
+        "div",
+        attrs={"style": "text-align: center; margin-left:auto; margin-right:auto"},
+    )
+    
+    if divFigures != None:
+    
+        divLocMap = divFigures.find(
+            "div",
+            class_="locmap",
+        )
+        
+        if divLocMap != None:
+            imgs = divLocMap.find('img')
+            divDesc = tds.find(
+                "div",
+                attrs={"style": "padding-top:0.2em"},
+            )
+            image = {}
+            if divDesc == None:
+                image['description'] = divFigures.text
+                
+            if divDesc != None:
+                image['description'] = divDesc.text.strip()
+                
+            image['url'] = imgs.attrs['src']
+            images.append(image)
+        
+        if divLocMap == None:
+            if isinstance(divFigures, Iterable):
+                for div in divFigures:
+                    image = {}
+                    divImgs = div.find("img")
+                    if divImgs != None and divImgs != -1:
+                        image['description'] = div.text.strip()
+                        image['url'] = divImgs.attrs['src']
+                        images.append(image)
+
+    if figures != None:
+        for figure in figures:
+            image = {}
+            figcaption = figure.find('figcaption')
+            imgs = figure.find('img')
+            image['description'] = figcaption.text.strip()
+            
+            if imgs != None:
+                image['url'] = imgs.attrs['src']
+            
+            images.append(image)
+    
+    return images
+            
+            

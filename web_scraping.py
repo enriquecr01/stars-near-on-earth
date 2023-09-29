@@ -49,16 +49,20 @@ def printPage():
         # print(tds)
         # print('-------------------')
     #print(tables.prettify())
-    print(json.dumps(systemsFormatted))
+    # print(json.dumps(systemsFormatted))
+    # return tables.prettify()
     
-    return tables.prettify()
+    
+    return json.dumps(systemsFormatted)
     
 def processSingleStar(tds): 
     systemObject = { "systemName": "N/A"  }
     starObject = {}
     starsArray = []
     for td in enumerate(tds):
-        propertyKey, objectFormatted = formatStar(td)
+        propertyKey, objectFormatted, images = formatStar(td)
+        if images != None:
+            starObject['images'] = images
         starObject[propertyKey] = objectFormatted
     
     starsArray.append(starObject)
