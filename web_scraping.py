@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 
-from format_table_row import formatStar
+from format_table_row import formatStar, formatSystem, getImages
 
 URL = "https://en.wikipedia.org/wiki/List_of_nearest_stars_and_brown_dwarfs"
 
@@ -25,6 +25,10 @@ def printPage():
         
         if len(tds) == 10:
             star = processSingleStar(tds)
+            systemsFormatted.append(star)
+            
+        if len(tds) == 11:
+            star = processSystemWithStars(tds)
             systemsFormatted.append(star)
         starObject = {}
         # for td in enumerate(tds):
@@ -64,6 +68,37 @@ def processSingleStar(tds):
         if images != None:
             starObject['images'] = images
         starObject[propertyKey] = objectFormatted
+    
+    starsArray.append(starObject)
+    systemObject["stars"] = starsArray
+    return systemObject
+
+def processSystemWithStars(tds): 
+    systemObject = {}
+    starObject = {}
+    starsArray = []
+    
+    print(tds[0])
+    
+    for td in enumerate(tds):
+        propertyKey, objectFormatted = formatSystem(td)
+        if propertyKey == "systemName":
+            systemObject[propertyKey] = objectFormatted
+        else:
+            starObject[propertyKey] = objectFormatted
+            
+            
+    starLink = tds[1].find_all("a")
+    hrefs = starLink
+        
+    print("jejeje", starLink)
+        
+    if len(starLink) == 0:
+        hrefs = tds[0].find_all("a")
+            
+    images = getImages("https://en.wikipedia.org" + hrefs[0].attrs["href"])
+    
+    starObject['images'] = images
     
     starsArray.append(starObject)
     systemObject["stars"] = starsArray

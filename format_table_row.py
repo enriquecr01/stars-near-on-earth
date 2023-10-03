@@ -28,13 +28,38 @@ def formatStar(tdNumber):
         return "notes", tdNumber[1].text, None
     return "none", 0, None
 
+def formatSystem(tdNumber):
+    if tdNumber[0] == 0:
+        return "systemName", tdNumber[1].text
+    if tdNumber[0] == 1:
+        return "name", tdNumber[1].text
+    if tdNumber[0] == 2:
+        return "distance", tdNumber[1].text
+    if tdNumber[0] == 3:
+        return "constelation", tdNumber[1].text
+    if tdNumber[0] == 4:
+        return "coordinates", tdNumber[1].text
+    if tdNumber[0] == 5:
+        return "stellarClass", tdNumber[1].text
+    if tdNumber[0] == 6:
+        return "solarMass", tdNumber[1].text
+    if tdNumber[0] == 7:
+        return "apparentMagnitude", tdNumber[1].text
+    if tdNumber[0] == 8:
+        return "absoluteMagnitude", tdNumber[1].text
+    if tdNumber[0] == 9:
+        return "stellarParallax", tdNumber[1].text
+    if tdNumber[0] == 10:
+        return "notes", tdNumber[1].text
+    return "none", 0
+
 
 def getImages(link):
     page = requests.get(link)
     soup = BeautifulSoup(page.content, "html.parser")
     figures = soup.findAll("figure")
     images = []
-    # print("-------------" + link + "-----------------")
+    print("-------------" + link + "-----------------")
 
     mainTable = soup.find("table", class_="infobox")
     tds = mainTable.find("td")
