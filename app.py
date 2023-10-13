@@ -1,4 +1,5 @@
 from flask import Flask
+import time
 from web_scraping import printPage
 
 app = Flask(__name__)
@@ -13,7 +14,11 @@ def print_name(name):
 
 @app.route('/getStars')
 def getStars():
+    start = time.time()
+    print("Started Timer")
     text = printPage()
+    end = time.time()
+    print(end - start)
     return text
 
 if __name__ == '__main__':

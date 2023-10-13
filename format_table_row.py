@@ -3,10 +3,10 @@ from bs4 import BeautifulSoup
 from collections.abc import Iterable
 
 
-def formatStar(tdNumber):
+def formatStar(tdNumber, session):
     if tdNumber[0] == 0:
         hrefs = tdNumber[1].find_all("a")
-        images = getImages("https://en.wikipedia.org" + hrefs[0].attrs["href"])
+        images = getImages("https://en.wikipedia.org" + hrefs[0].attrs["href"], session)
         return "name", tdNumber[1].text, images
     if tdNumber[0] == 1:
         return "distance", tdNumber[1].text, None
@@ -146,8 +146,8 @@ def formatStarNineTdsWithConstelation(tdNumber):
         return "stellarParallax", tdNumber[1].text
     return "none", 0
 
-def getImages(link):
-    page = requests.get(link)
+def getImages(link, session):
+    page = session.get(link)
     soup = BeautifulSoup(page.content, "html.parser")
     figures = soup.findAll("figure")
     images = []

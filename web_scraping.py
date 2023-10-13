@@ -1,10 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+import requests
 
 from format_table_row import formatStar, formatSystem, getImages, formatStarFiveTds, formatStarSixTds, formatStarSevenTds, formatStarNineTds, formatStarNineTdsWithConstelation
 
 URL = "https://en.wikipedia.org/wiki/List_of_nearest_stars_and_brown_dwarfs"
+session = requests.Session()
+
 
 def printPage():
     # Scrapping
@@ -88,7 +91,7 @@ def processSingleStar(tds):
     starObject = {}
     starsArray = []
     for td in enumerate(tds):
-        propertyKey, objectFormatted, images = formatStar(td)
+        propertyKey, objectFormatted, images = formatStar(td, session)
         if images != None:
             starObject['images'] = images
         starObject[propertyKey] = objectFormatted
@@ -116,7 +119,7 @@ def processSystemWithStars(tds):
     if len(starLink) == 0:
         hrefs = tds[0].find_all("a")
             
-    images = getImages("https://en.wikipedia.org" + hrefs[0].attrs["href"])
+    images = getImages("https://en.wikipedia.org" + hrefs[0].attrs["href"], session)
     
     starObject['images'] = images
     
