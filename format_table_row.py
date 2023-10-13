@@ -11,7 +11,7 @@ def formatStar(tdNumber):
     if tdNumber[0] == 1:
         return "distance", tdNumber[1].text, None
     if tdNumber[0] == 2:
-        return "constelation", tdNumber[1].text, None
+        return "constellation", tdNumber[1].text, None
     if tdNumber[0] == 3:
         return "coordinates", tdNumber[1].text, None
     if tdNumber[0] == 4:
@@ -36,7 +36,7 @@ def formatSystem(tdNumber):
     if tdNumber[0] == 2:
         return "distance", tdNumber[1].text
     if tdNumber[0] == 3:
-        return "constelation", tdNumber[1].text
+        return "constellation", tdNumber[1].text
     if tdNumber[0] == 4:
         return "coordinates", tdNumber[1].text
     if tdNumber[0] == 5:
@@ -57,22 +57,101 @@ def formatStarFiveTds(tdNumber):
     if tdNumber[0] == 0:
         return "name", tdNumber[1].text
     if tdNumber[0] == 1:
-        return "stellarClass", tdNumber[1].text
+        return "coordinates", tdNumber[1].text
     if tdNumber[0] == 2:
-        return "solarMass", tdNumber[1].text
+        return "stellarClass", tdNumber[1].text
     if tdNumber[0] == 3:
-        return "apparentMagnitude", tdNumber[1].text
+        return "solarMass", tdNumber[1].text
     if tdNumber[0] == 4:
+        return "apparentMagnitude", tdNumber[1].text
+    if tdNumber[0] == 5:
         return "absoluteMagnitude", tdNumber[1].text
+    if tdNumber[0] == 6:
+        return "notes", tdNumber[1].text
     return "none", 0
 
+def formatStarSixTds(tdNumber):
+    if tdNumber[0] == 0:
+        return "name", tdNumber[1].text
+    if tdNumber[0] == 1:
+        return "coordinates", tdNumber[1].text
+    if tdNumber[0] == 2:
+        return "stellarClass", tdNumber[1].text
+    if tdNumber[0] == 3:
+        return "solarMass", tdNumber[1].text
+    if tdNumber[0] == 4:
+        return "apparentMagnitude", tdNumber[1].text
+    if tdNumber[0] == 5:
+        return "absoluteMagnitude", tdNumber[1].text
+    if tdNumber[0] == 6:
+        return "notes", tdNumber[1].text
+    return "none", 0
+
+def formatStarSevenTds(tdNumber):
+    if tdNumber[0] == 0:
+        return "name", tdNumber[1].text
+    if tdNumber[0] == 1:
+        return "coordinates", tdNumber[1].text
+    if tdNumber[0] == 2:
+        return "stellarClass", tdNumber[1].text
+    if tdNumber[0] == 3:
+        return "solarMass", tdNumber[1].text
+    if tdNumber[0] == 4:
+        return "apparentMagnitude", tdNumber[1].text
+    if tdNumber[0] == 5:
+        return "absoluteMagnitude", tdNumber[1].text
+    if tdNumber[0] == 6:
+        return "notes", tdNumber[1].text
+    return "none", 0
+
+def formatStarNineTds(tdNumber):
+    if tdNumber[0] == 0:
+        return "name", tdNumber[1].text
+    if tdNumber[0] == 1:
+        return "distance", tdNumber[1].text
+    if tdNumber[0] == 2:
+        return "coordinates", tdNumber[1].text
+    if tdNumber[0] == 3:
+        return "stellarClass", tdNumber[1].text
+    if tdNumber[0] == 4:
+        return "solarMass", tdNumber[1].text
+    if tdNumber[0] == 5:
+        return "apparentMagnitude", tdNumber[1].text
+    if tdNumber[0] == 6:
+        return "absoluteMagnitude", tdNumber[1].text
+    if tdNumber[0] == 7:
+        return "stellarParallax", tdNumber[1].text
+    if tdNumber[0] == 8:
+        return "notes", tdNumber[1].text
+    return "none", 0
+
+def formatStarNineTdsWithConstelation(tdNumber):
+    if tdNumber[0] == 0:
+        return "name", tdNumber[1].text
+    if tdNumber[0] == 1:
+        return "distance", tdNumber[1].text
+    if tdNumber[0] == 2:
+        return "constellation", tdNumber[1].text
+    if tdNumber[0] == 3:
+        return "coordinates", tdNumber[1].text
+    if tdNumber[0] == 4:
+        return "stellarClass", tdNumber[1].text
+    if tdNumber[0] == 5:
+        return "solarMass", tdNumber[1].text
+    if tdNumber[0] == 6:
+        return "apparentMagnitude", tdNumber[1].text
+    if tdNumber[0] == 7:
+        return "absoluteMagnitude", tdNumber[1].text
+    if tdNumber[0] == 8:
+        return "stellarParallax", tdNumber[1].text
+    return "none", 0
 
 def getImages(link):
     page = requests.get(link)
     soup = BeautifulSoup(page.content, "html.parser")
     figures = soup.findAll("figure")
     images = []
-    print("-------------" + link + "-----------------")
+    # print("-------------" + link + "-----------------")
 
     mainTable = soup.find("table", class_="infobox")
     tds = mainTable.find("td")
