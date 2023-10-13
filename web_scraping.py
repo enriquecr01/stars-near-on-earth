@@ -80,45 +80,6 @@ def printPage():
                 star['distance'] = distance
                 star['stellarParallax'] = parallax
                 systemsFormatted[len(systemsFormatted) - 1]['stars'].append(star)
-                
-            
-            # star = processStarWithNineTds(tds)
-            # if not hasConstellation:
-
-            # else:
-                # systemObject = { "systemName": "N/A" }
-                # starsArray = []
-                # starsArray.append(star)
-                # systemObject["stars"] = starsArray
-                
-            
-        
-        starObject = {}
-        # for td in enumerate(tds):
-        #     # if len(tds) == 11: 
-        #     # if len(tds) == 10: 
-                
-            
-        #     if td[0] == 0:
-        #         if 'colspan' in td[1].attrs:
-        #             print("ahuievpo")
-        #         else:
-        #             print("no hay carnal")
-                    
-        #         if 'rowspan' in td[1].attrs:
-        #             print("rowspan", td[1].attrs)
-        #         else:
-        #             print("no hay rowspan")
-                    
-                    
-                    
-        # print('-------------------')
-        # print(tds)
-        # print('-------------------')
-    #print(tables.prettify())
-    # print(json.dumps(systemsFormatted))
-    # return tables.prettify()
-    
     
     return json.dumps(systemsFormatted)
     
@@ -140,8 +101,6 @@ def processSystemWithStars(tds):
     systemObject = {}
     starObject = {}
     starsArray = []
-    
-    # print(tds[0])
     
     for td in enumerate(tds):
         propertyKey, objectFormatted = formatSystem(td)
@@ -196,24 +155,9 @@ def processStarWithSevenTds(tds):
 
 def processStarWithNineTds(tds):
     starObject = {}
-    
-    # hasConstellation = False
-
-    # for td in tds:        
-    #     if td.attrs.get("style"):
-    #         if td.attrs["style"] == "background-color: pink":
-    #             hasConstellation = True
-
     for td in enumerate(tds):
 
         propertyKey, objectFormatted = formatStarNineTds(td)
         starObject[propertyKey] = objectFormatted
-            
-        # if hasConstellation:
-        #     propertyKey, objectFormatted = formatStarNineTdsWithConstelation(td)
-        #     starObject[propertyKey] = objectFormatted
-        # else:    
-        #     propertyKey, objectFormatted = formatStarNineTds(td)
-        #     starObject[propertyKey] = objectFormatted
             
     return starObject
