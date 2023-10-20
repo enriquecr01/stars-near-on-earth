@@ -180,7 +180,7 @@ def getImages(link, session):
             if divDesc != None:
                 image['description'] = divDesc.text.strip()
                 
-            image['url'] = imgs.attrs['src']
+            image['url'] = formatURLImage(imgs.attrs['src'])
             images.append(image)
         
         if divLocMap == None:
@@ -190,7 +190,7 @@ def getImages(link, session):
                     divImgs = div.find("img")
                     if divImgs != None and divImgs != -1:
                         image['description'] = div.text.strip()
-                        image['url'] = divImgs.attrs['src']
+                        image['url'] = formatURLImage(divImgs.attrs['src'])
                         images.append(image)
 
     if figures != None:
@@ -201,10 +201,28 @@ def getImages(link, session):
             image['description'] = figcaption.text.strip()
             
             if imgs != None:
-                image['url'] = imgs.attrs['src']
+                image['url'] = formatURLImage(imgs.attrs['src'])
             
             images.append(image)
     
     return images
+
+def formatURLImage(originalURL):
+    splitedURL = originalURL.split("/")
+    lastPartUrl = splitedURL[len(splitedURL) - 1]
+    splitedLastPartUrl = lastPartUrl.split("-")
+    splitedLastPartUrl.pop(0)
+    del splitedURL[len(splitedURL) - 1]
+    
+    finalUrl = "/".join(splitedURL)
+    
+    lastPart = "-".join(splitedLastPartUrl)
+    
+    finalUrl += "/1200px-" + lastPart
+    
+    
+    return finalUrl
+    
+    
             
             
