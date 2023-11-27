@@ -5,7 +5,7 @@ from web_scraping import printPage
 
 app = Flask(__name__)
 
-CORS(app, origins=['http://localhost:3000', 'https://enriquechavezr.com/'])
+CORS(app, origins=['http://localhost:3000', 'https://enriquechavezr.com/*'])
 
 @app.route('/')
 def index():
