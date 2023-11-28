@@ -208,6 +208,9 @@ def getImages(link, session):
     return images
 
 def formatURLImage(originalURL):
+    if "thumb" not in originalURL:
+        return originalURL
+    
     splitedURL = originalURL.split("/")
     lastPartUrl = splitedURL[len(splitedURL) - 1]
     splitedLastPartUrl = lastPartUrl.split("-")
