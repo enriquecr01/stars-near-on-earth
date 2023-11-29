@@ -166,7 +166,7 @@ def getImages(link, session):
             "div",
             class_="locmap",
         )
-        
+                
         if divLocMap != None:
             imgs = divLocMap.find('img')
             divDesc = tds.find(
@@ -189,7 +189,7 @@ def getImages(link, session):
                     image = {}
                     divImgs = div.find("img")
                     if divImgs != None and divImgs != -1:
-                        image['description'] = div.text.strip()
+                        image['description'] = mainTable.find("tr").text.strip()
                         image['url'] = formatURLImage(divImgs.attrs['src'])
                         images.append(image)
 
@@ -204,6 +204,24 @@ def getImages(link, session):
                 image['url'] = formatURLImage(imgs.attrs['src'])
             
             images.append(image)
+            
+        
+    divLocMapMainTable = mainTable.find("div", class_="locmap" )
+        
+    if divLocMapMainTable != None:
+        imgs = divLocMapMainTable.find('img')
+        divDesc = divLocMapMainTable.find("div", attrs={"style": "padding-top:0.2em"},)
+        image = {}
+        
+        image['description'] = ""
+        
+        if divDesc != None:
+            image['description'] = divDesc.text.strip()
+        else:
+            image['description'] = divLocMapMainTable.text.strip()
+                
+        image['url'] = formatURLImage(imgs.attrs['src'])
+        images.append(image)
     
     return images
 
