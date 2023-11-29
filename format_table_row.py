@@ -198,12 +198,11 @@ def getImages(link, session):
             image = {}
             figcaption = figure.find('figcaption')
             imgs = figure.find('img')
-            image['description'] = figcaption.text.strip()
-            
             if imgs != None:
-                image['url'] = formatURLImage(imgs.attrs['src'])
-            
-            images.append(image)
+                image['description'] = figcaption.text.strip()
+                if imgs != None:
+                    image['url'] = formatURLImage(imgs.attrs['src'])
+                images.append(image)
             
         
     divLocMapMainTable = mainTable.find("div", class_="locmap" )
