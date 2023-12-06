@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import requests
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 
 from format_table_row import formatStar, formatSystem, getImages, formatStarFiveTds, formatStarSixTds, formatStarSevenTds, formatStarNineTds, formatStarNineTdsWithConstelation
 
@@ -16,36 +16,43 @@ def printPage():
     soup = BeautifulSoup(page.content, "html.parser")
     tables = soup.find('table', class_='mw-collapsible')
     trs = tables.find_all('tr')
+    result = []
     
-    # Transforming each object from HTML to string for use with multiprocessing
-    trsString = []
-    for tr in trs:
-        trsString.append(str(tr))
+    if cpu_count() >= 4:
+        print("Using Multiprocessing")
+        # Transforming each object from HTML to string for use with multiprocessing
+        trsString = []
+        for tr in trs:
+            trsString.append(str(tr))
+            
+        longitud = len(trsString) - 1
+
+        # Calculate the different point to make the division by 4
+        point1 = longitud // 4
+        point2 = 2 * longitud // 4
+        point3 = 3 * longitud // 4
+
+        # Divide the trsString by four parts
+        part1 = trsString[:point1]
+        part2 = trsString[point1:point2]
+        part3 = trsString[point2:point3]
+        part4 = trsString[point3:]
+
+
+        arrays = [part1, part2, part3, part4]
         
-    longitud = len(trsString) - 1
-
-    # Calculate the different point to make the division by 4
-    point1 = longitud // 4
-    point2 = 2 * longitud // 4
-    point3 = 3 * longitud // 4
-
-    # Divide the trsString by four parts
-    part1 = trsString[:point1]
-    part2 = trsString[point1:point2]
-    part3 = trsString[point2:point3]
-    part4 = trsString[point3:]
-
-
-    arrays = [part1, part2, part3, part4]
+        p = Pool()
+        results = p.map(processAllTrsMultiprocessing, arrays)
+        p.terminate()
+        p.join()
+        result = results[0] + results[1] + results[2] + results[3]
+    else:
+        print("Normal using")
+        result = processAllTrs(trs)
     
-    p = Pool()
-    resultados = p.map(processAllTrs, arrays)
-    p.terminate()
-    p.join()
+    return json.dumps(result)
     
-    return json.dumps(resultados[0] + resultados[1] + resultados[2] + resultados[3])
-
-def processAllTrs(trs):
+def processAllTrsMultiprocessing(trs):
     # Formatting objects
     systemsFormatted = []
     
@@ -60,6 +67,84 @@ def processAllTrs(trs):
         trParsed = BeautifulSoup(tr, 'html.parser')
         
         tds = trParsed.find_all('td')
+        
+        if len(tds) == 10:
+            star = processSingleStar(tds)
+            systemsFormatted.append(star)
+            
+        if len(tds) == 11:
+            system = processSystemWithStars(tds)
+            systemsFormatted.append(system)
+            distance = system['stars'][0]["distance"]
+            constellation = system['stars'][0]['constellation']
+            coordinates = system['stars'][0]['coordinates']
+            parallax = system['stars'][0]['stellarParallax']
+            notes = system['stars'][0]['notes']
+                    
+        if len(tds) == 5:
+            star = processStarWithFiveTds(tds)
+            star['distance'] = distance
+            star['constellation'] = constellation
+            star['coordinates'] = coordinates
+            star['stellarParallax'] = parallax
+            star['notes'] = notes
+            index = 0 if len(systemsFormatted) - 1 == -1 else len(systemsFormatted) - 1
+            systemsFormatted[index]['stars'].append(star)
+            
+        if len(tds) == 6:
+            star = processStarWithSixTds(tds)
+            star['distance'] = distance
+            star['constellation'] = constellation
+            star['stellarParallax'] = parallax
+            index = 0 if len(systemsFormatted) - 1 == -1 else len(systemsFormatted) - 1
+            systemsFormatted[index]['stars'].append(star)
+            
+            
+        if len(tds) == 7:
+            star = processStarWithSevenTds(tds)
+            star['distance'] = distance
+            star['constellation'] = constellation
+            star['stellarParallax'] = parallax
+            index = 0 if len(systemsFormatted) - 1 == -1 else len(systemsFormatted) - 1
+            systemsFormatted[index]['stars'].append(star)
+            
+            
+            
+        if len(tds) == 9:
+            hasConstellation = False
+
+            for td in tds:        
+                if td.attrs.get("style"):
+                    if td.attrs["style"] == "background-color: pink":
+                        hasConstellation = True
+
+            
+            if hasConstellation: 
+                star = processSingleStar(tds)
+                systemsFormatted.append(star)
+            else:
+                star = processStarWithNineTds(tds)
+                star['distance'] = distance
+                star['stellarParallax'] = parallax
+                index = 0 if len(systemsFormatted) - 1 == -1 else len(systemsFormatted) - 1
+                systemsFormatted[index]['stars'].append(star)    
+                
+    
+    return systemsFormatted
+
+def processAllTrs(trs):
+    # Formatting objects
+    systemsFormatted = []
+    
+    # Common columns with the stars
+    distance = 0
+    constellation = ''
+    coordinates = ''
+    parallax = ''
+    notes = ''
+    
+    for tr in trs:
+        tds = tr.find_all('td')
         
         if len(tds) == 10:
             star = processSingleStar(tds)
