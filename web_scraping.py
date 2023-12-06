@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import requests
+from multiprocessing import Pool
 
 from format_table_row import formatStar, formatSystem, getImages, formatStarFiveTds, formatStarSixTds, formatStarSevenTds, formatStarNineTds, formatStarNineTdsWithConstelation
 
@@ -16,6 +17,35 @@ def printPage():
     tables = soup.find('table', class_='mw-collapsible')
     trs = tables.find_all('tr')
     
+    # Transforming each object from HTML to string for use with multiprocessing
+    trsString = []
+    for tr in trs:
+        trsString.append(str(tr))
+        
+    longitud = len(trsString) - 1
+
+    # Calculate the different point to make the division by 4
+    point1 = longitud // 4
+    point2 = 2 * longitud // 4
+    point3 = 3 * longitud // 4
+
+    # Divide the trsString by four parts
+    part1 = trsString[:point1]
+    part2 = trsString[point1:point2]
+    part3 = trsString[point2:point3]
+    part4 = trsString[point3:]
+
+
+    arrays = [part1, part2, part3, part4]
+    
+    p = Pool()
+    resultados = p.map(processAllTrs, arrays)
+    p.terminate()
+    p.join()
+    
+    return json.dumps(resultados[0] + resultados[1] + resultados[2] + resultados[3])
+
+def processAllTrs(trs):
     # Formatting objects
     systemsFormatted = []
     
@@ -27,7 +57,9 @@ def printPage():
     notes = ''
     
     for tr in trs:
-        tds = tr.find_all('td')
+        trParsed = BeautifulSoup(tr, 'html.parser')
+        
+        tds = trParsed.find_all('td')
         
         if len(tds) == 10:
             star = processSingleStar(tds)
@@ -49,21 +81,26 @@ def printPage():
             star['coordinates'] = coordinates
             star['stellarParallax'] = parallax
             star['notes'] = notes
-            systemsFormatted[len(systemsFormatted) - 1]['stars'].append(star)
+            index = 0 if len(systemsFormatted) - 1 == -1 else len(systemsFormatted) - 1
+            systemsFormatted[index]['stars'].append(star)
             
         if len(tds) == 6:
             star = processStarWithSixTds(tds)
             star['distance'] = distance
             star['constellation'] = constellation
             star['stellarParallax'] = parallax
-            systemsFormatted[len(systemsFormatted) - 1]['stars'].append(star)
+            index = 0 if len(systemsFormatted) - 1 == -1 else len(systemsFormatted) - 1
+            systemsFormatted[index]['stars'].append(star)
+            
             
         if len(tds) == 7:
             star = processStarWithSevenTds(tds)
             star['distance'] = distance
             star['constellation'] = constellation
             star['stellarParallax'] = parallax
-            systemsFormatted[len(systemsFormatted) - 1]['stars'].append(star)
+            index = 0 if len(systemsFormatted) - 1 == -1 else len(systemsFormatted) - 1
+            systemsFormatted[index]['stars'].append(star)
+            
             
             
         if len(tds) == 9:
@@ -82,9 +119,11 @@ def printPage():
                 star = processStarWithNineTds(tds)
                 star['distance'] = distance
                 star['stellarParallax'] = parallax
-                systemsFormatted[len(systemsFormatted) - 1]['stars'].append(star)
+                index = 0 if len(systemsFormatted) - 1 == -1 else len(systemsFormatted) - 1
+                systemsFormatted[index]['stars'].append(star)    
+                
     
-    return json.dumps(systemsFormatted)
+    return systemsFormatted
     
 def processSingleStar(tds): 
     systemObject = { "systemName": "N/A"  }
