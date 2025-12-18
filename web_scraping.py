@@ -14,7 +14,7 @@ def printPage():
     # Scrapping
     page = requests.get(URL)
     soup = BeautifulSoup(page.content, "html.parser")
-    tables = soup.find('table', class_='mw-collapsible')
+    tables = soup.find('table', class_='wikitable')
     trs = tables.find_all('tr')
     result = []
     
