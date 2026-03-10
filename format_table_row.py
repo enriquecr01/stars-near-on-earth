@@ -154,7 +154,13 @@ def getImages(link, session):
     # print("-------------" + link + "-----------------")
 
     mainTable = soup.find("table", class_="infobox")
+    if mainTable is None:
+        return []
+
     tds = mainTable.find("td")
+    if tds is None:
+        return []
+
     divFigures = tds.find(
         "div",
         attrs={"style": "text-align: center; margin-left:auto; margin-right:auto"},

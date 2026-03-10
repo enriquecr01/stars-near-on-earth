@@ -3,18 +3,27 @@ from bs4 import BeautifulSoup
 import json
 import requests
 from multiprocessing import Pool, cpu_count
+import warnings
+from bs4 import MarkupResemblesLocatorWarning
 
 from format_table_row import formatStar, formatSystem, getImages, formatStarFiveTds, formatStarSixTds, formatStarSevenTds, formatStarNineTds, formatStarNineTdsWithConstelation
 
-URL = "https://en.wikipedia.org/wiki/List_of_nearest_stars_and_brown_dwarfs"
+URL = "https://en.wikipedia.org/wiki/List_of_nearest_stars"
 session = requests.Session()
+
+headers = {
+    "User-Agent": "Mozilla/5.0"
+}
+
+warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 
 def printPage():
     # Scrapping
-    page = requests.get(URL)
-    soup = BeautifulSoup(page.content, "html.parser")
-    tables = soup.find('table', class_='wikitable')
+    page = requests.get(URL, headers=headers)
+    soup = BeautifulSoup(page.text, "html.parser")
+
+    tables = soup.find_all('table', class_='wikitable')[1]
     trs = tables.find_all('tr')
     result = []
     
@@ -67,6 +76,12 @@ def processAllTrsMultiprocessing(trs):
         trParsed = BeautifulSoup(tr, 'html.parser')
         
         tds = trParsed.find_all('td')
+
+        # Guard against table rows that don't include a system/star header yet.
+        # Some rows in the Wikipedia table only contain extra star info, so we
+        # need a placeholder entry to append to.
+        if len(tds) in (5, 6, 7, 9) and not systemsFormatted:
+            systemsFormatted.append({"systemName": "N/A", "stars": []})
         
         if len(tds) == 10:
             star = processSingleStar(tds)
@@ -145,6 +160,12 @@ def processAllTrs(trs):
     
     for tr in trs:
         tds = tr.find_all('td')
+
+        # Guard against table rows that don't include a system/star header yet.
+        # Some rows in the Wikipedia table only contain extra star info, so we
+        # need a placeholder entry to append to.
+        if len(tds) in (5, 6, 7, 9) and not systemsFormatted:
+            systemsFormatted.append({"systemName": "N/A", "stars": []})
         
         if len(tds) == 10:
             star = processSingleStar(tds)
