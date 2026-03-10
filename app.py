@@ -1,11 +1,11 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 import time
 from web_scraping import printPage
 
 app = Flask(__name__)
 
-CORS(app, origins=['http://localhost:3000', 'https://enriquechavezr.com/*'])
+CORS(app, origins=['http://localhost:5173', 'https://enriquechavezr.com/*'])
 
 @app.route('/')
 def index():
@@ -19,10 +19,10 @@ def print_name(name):
 def getStars():
     start = time.time()
     print("Started Timer")
-    text = printPage()
+    data = printPage()
     end = time.time()
     print(end - start)
-    return text
+    return jsonify(data)
 
 if __name__ == '__main__':
     app.run(debug=True)
