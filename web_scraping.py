@@ -101,12 +101,28 @@ def parse_known_systems_within_20ly(selector):
                 "absoluteMagnitude": absoluteMagnitude,
                 "stellarParallax": stellarParallax,
                 "notes": notes,
-                "images": [],
+                "images": _fetch_images_from_row(tds) or [],
             }
             systems.append({"systemName": systemName, "stars": [star]})
 
         return systems
 
+    return []
+
+
+def _fetch_images_from_row(tds):
+    """Try to fetch images from the first /wiki/ link found in the given row."""
+    for td in tds:
+        for a in td.find_all("a"):
+            href = a.attrib.get("href")
+            if not href or not href.startswith("/wiki/"):
+                continue
+            try:
+                imgs = getImages("https://en.wikipedia.org" + href, session)
+                if imgs:
+                    return imgs
+            except Exception:
+                continue
     return []
 
 
@@ -323,6 +339,19 @@ def processSingleStar(tds):
         starObject['images'] = images or []
         starObject[propertyKey] = objectFormatted
 
+    # If we didn't get images (e.g. colspan/rowspan row structure), try to find any useful link in the row.
+    if not starObject.get('images'):
+        for td in tds:
+            hrefs = td.find_all('a')
+            if not hrefs:
+                continue
+            href = hrefs[0].attrib.get('href')
+            if not href or not href.startswith('/wiki/'):
+                continue
+            starObject['images'] = getImages('https://en.wikipedia.org' + href, session)
+            if starObject['images']:
+                break
+
     # Ensure systemName is populated even when the table doesn't explicitly include it
     if 'name' in starObject:
         systemObject['systemName'] = starObject['name']
@@ -366,7 +395,7 @@ def processStarWithFiveTds(tds):
         propertyKey, objectFormatted = formatStarFiveTds(td)
         starObject[propertyKey] = objectFormatted
             
-    starObject['images'] = []
+    starObject['images'] = _fetch_images_from_row(tds)
     return starObject
 
 def processStarWithSixTds(tds):
@@ -376,7 +405,7 @@ def processStarWithSixTds(tds):
         propertyKey, objectFormatted = formatStarSixTds(td)
         starObject[propertyKey] = objectFormatted
             
-    starObject['images'] = []
+    starObject['images'] = _fetch_images_from_row(tds)
     return starObject
 
 
@@ -387,7 +416,7 @@ def processStarWithSevenTds(tds):
         propertyKey, objectFormatted = formatStarSevenTds(td)
         starObject[propertyKey] = objectFormatted
             
-    starObject['images'] = []
+    starObject['images'] = _fetch_images_from_row(tds)
     return starObject
 
 def processStarWithNineTds(tds):
@@ -397,5 +426,5 @@ def processStarWithNineTds(tds):
         propertyKey, objectFormatted = formatStarNineTds(td)
         starObject[propertyKey] = objectFormatted
             
-    starObject['images'] = []
+    starObject['images'] = _fetch_images_from_row(tds)
     return starObject
