@@ -148,88 +148,85 @@ def formatStarNineTdsWithConstelation(tdNumber):
     return "none", 0
 
 def getImages(link, session):
+    # Ensure Wikipedia allows scraping by setting a realistic User-Agent
+    session.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+
     page = session.get(link)
+    if page.status_code != 200:
+        return []
+
     soup = BeautifulSoup(page.content, "html.parser")
-    figures = soup.findAll("figure")
     images = []
-    # print("-------------" + link + "-----------------")
 
-    mainTable = soup.find("table", class_="infobox")
-    if mainTable is None:
-        return []
+    # 1) Extract images inside infobox from either td.infobox-image or centered container
+    infobox = soup.find("table", class_="infobox")
+    if infobox:
+        # infobox-image images
+        infobox_image_imgs = infobox.select("td.infobox-image img")
+        for img in infobox_image_imgs:
+            td_parent = img.find_parent("td")
+            if td_parent and "infobox-data" in td_parent.get("class", []):
+                continue
+            url = img.get("src") or img.get("data-src")
+            if not url:
+                continue
+            url = formatURLImage(url)
+            description = img.get("alt", "").strip()
+            if not description:
+                caption = img.find_parent("td")
+                if caption:
+                    description = caption.get_text(separator=" ", strip=True)
+            images.append({"url": url, "description": description})
 
-    tds = mainTable.find("td")
-    if tds is None:
-        return []
+        # centered-image container images
+        centered_containers = infobox.select("td div[style*='text-align: center;'][style*='margin-left:auto;'][style*='margin-right:auto']")
+        for container in centered_containers:
+            for img in container.find_all("img"):
+                td_parent = img.find_parent("td")
+                if td_parent and "infobox-data" in td_parent.get("class", []):
+                    continue
+                url = img.get("src") or img.get("data-src")
+                if not url:
+                    continue
+                url = formatURLImage(url)
+                description = img.get("alt", "").strip()
+                if not description:
+                    caption = img.find_parent("td")
+                    if caption:
+                        description = caption.get_text(separator=" ", strip=True)
+                images.append({"url": url, "description": description})
 
-    divFigures = tds.find(
-        "div",
-        attrs={"style": "text-align: center; margin-left:auto; margin-right:auto"},
-    )
-    
-    if divFigures != None:
-    
-        divLocMap = divFigures.find(
-            "div",
-            class_="locmap",
-        )
-                
-        if divLocMap != None:
-            imgs = divLocMap.find('img')
-            divDesc = tds.find(
-                "div",
-                attrs={"style": "padding-top:0.2em"},
-            )
-            image = {}
-            if divDesc == None:
-                image['description'] = divFigures.text
-                
-            if divDesc != None:
-                image['description'] = divDesc.text.strip()
-                
-            image['url'] = formatURLImage(imgs.attrs['src'])
-            images.append(image)
-        
-        if divLocMap == None:
-            if isinstance(divFigures, Iterable):
-                for div in divFigures:
-                    image = {}
-                    divImgs = div.find("img")
-                    if divImgs != None and divImgs != -1:
-                        image['description'] = mainTable.find("tr").text.strip()
-                        image['url'] = formatURLImage(divImgs.attrs['src'])
-                        images.append(image)
+    # 2) Extract all images inside figures
+    figures = soup.find_all("figure")
+    for figure in figures:
+        img = figure.find("img")
+        if not img:
+            continue
 
-    if figures != None:
-        for figure in figures:
-            image = {}
-            figcaption = figure.find('figcaption')
-            imgs = figure.find('img')
-            if imgs != None:
-                image['description'] = figcaption.text.strip()
-                if imgs != None:
-                    image['url'] = formatURLImage(imgs.attrs['src'])
-                images.append(image)
-            
-        
-    divLocMapMainTable = mainTable.find("div", class_="locmap" )
-        
-    if divLocMapMainTable != None:
-        imgs = divLocMapMainTable.find('img')
-        divDesc = divLocMapMainTable.find("div", attrs={"style": "padding-top:0.2em"},)
-        image = {}
-        
-        image['description'] = ""
-        
-        if divDesc != None:
-            image['description'] = divDesc.text.strip()
+        url = img.get("src") or img.get("data-src")
+        if not url:
+            continue
+        url = formatURLImage(url)
+
+        figcaption = figure.find("figcaption")
+        description = ""
+        if figcaption and figcaption.text.strip():
+            description = figcaption.text.strip()
         else:
-            image['description'] = divLocMapMainTable.text.strip()
-                
-        image['url'] = formatURLImage(imgs.attrs['src'])
-        images.append(image)
-    
-    return images
+            description = img.get("alt", "").strip()
+
+        images.append({"url": url, "description": description})
+
+    # Deduplicate by url preserving first description
+    seen = set()
+    unique_images = []
+    for img in images:
+        if img["url"] in seen:
+            continue
+        seen.add(img["url"])
+        unique_images.append(img)
+
+    return unique_images
 
 def formatURLImage(originalURL):
     if "thumb" not in originalURL:

@@ -8,7 +8,7 @@ This repository is related to the scrap the information and return a API.
 
 ## Features
 
-- scrapling is used to do the data extraction.
+- beautiful soup is used to do the data extraction.
 - Depending on the cores of the team that executes the process.
 - The multiprocessing technique is used. Since Python hosting only has one core. You can select the type of process you want to use to display the information. Either load the saved stars or use the API and scrape.
 
