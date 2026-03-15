@@ -22,7 +22,7 @@ def getStars():
     data = printPage()
     end = time.time()
     print(end - start)
-    return jsonify(data)
+    return data
 
 if __name__ == '__main__':
     app.run(debug=True)
