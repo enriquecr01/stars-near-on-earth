@@ -237,10 +237,10 @@ def formatURLImage(originalURL):
 
     # Wikimedia thumbnail URLs follow the pattern:
     #   .../commons/thumb/{hash1}/{hash2}/{filename}/{Npx}-{filename}
-    # The original file lives at:
-    #   .../commons/{hash1}/{hash2}/{filename}
-    url_without_thumb = originalURL.replace("/thumb/", "/")
-    return url_without_thumb.rsplit("/", 1)[0]
+    # Replace the size prefix of the last segment with 1280px.
+    base, last = originalURL.rsplit("/", 1)
+    filename = last.split("-", 1)[1]
+    return f"{base}/1280px-{filename}"
     
     
             
