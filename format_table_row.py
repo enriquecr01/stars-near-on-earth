@@ -229,6 +229,9 @@ def getImages(link, session):
     return unique_images
 
 def formatURLImage(originalURL):
+    if originalURL.startswith("//"):
+        originalURL = "https:" + originalURL
+
     if "thumb" not in originalURL:
         return originalURL
     
