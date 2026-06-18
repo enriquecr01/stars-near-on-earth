@@ -232,23 +232,15 @@ def formatURLImage(originalURL):
     if originalURL.startswith("//"):
         originalURL = "https:" + originalURL
 
-    if "thumb" not in originalURL:
+    if "/thumb/" not in originalURL:
         return originalURL
-    
-    splitedURL = originalURL.split("/")
-    lastPartUrl = splitedURL[len(splitedURL) - 1]
-    splitedLastPartUrl = lastPartUrl.split("-")
-    splitedLastPartUrl.pop(0)
-    del splitedURL[len(splitedURL) - 1]
-    
-    finalUrl = "/".join(splitedURL)
-    
-    lastPart = "-".join(splitedLastPartUrl)
-    
-    finalUrl += "/1200px-" + lastPart
-    
-    
-    return finalUrl
+
+    # Wikimedia thumbnail URLs follow the pattern:
+    #   .../commons/thumb/{hash1}/{hash2}/{filename}/{Npx}-{filename}
+    # The original file lives at:
+    #   .../commons/{hash1}/{hash2}/{filename}
+    url_without_thumb = originalURL.replace("/thumb/", "/")
+    return url_without_thumb.rsplit("/", 1)[0]
     
     
             
