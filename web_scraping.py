@@ -264,7 +264,9 @@ def processSystemWithStars(tds):
     if len(starLink) == 0:
         hrefs = tds[0].find_all("a")
             
-    images = getImages("https://en.wikipedia.org" + hrefs[0].attrs["href"], session)
+    href = hrefs[0].attrs["href"]
+    link = href if href.startswith("http") else "https://en.wikipedia.org" + href
+    images = getImages(link, session)
     
     starObject['images'] = images
     

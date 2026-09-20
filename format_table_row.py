@@ -7,7 +7,9 @@ from collections.abc import Iterable
 def formatStar(tdNumber, session):
     if tdNumber[0] == 0:
         hrefs = tdNumber[1].find_all("a")
-        images = getImages("https://en.wikipedia.org" + hrefs[0].attrs["href"], session)
+        href = hrefs[0].attrs["href"]
+        link = href if href.startswith("http") else "https://en.wikipedia.org" + href
+        images = getImages(link, session)
         return "name", tdNumber[1].text, images
     if tdNumber[0] == 1:
         return "distance", tdNumber[1].text, None
