@@ -13,3 +13,47 @@ This repository is related to the scrap the information and return a API.
 - The multiprocessing technique is used. Since Python hosting only has one core. You can select the type of process you want to use to display the information. Either load the saved stars or use the API and scrape.
 
 ![Showing the image of the star obtained by Wikipedia.](https://enriquechavezr.com/wp-content/uploads/2023/12/Stars_Near_Earth_4.png)
+
+## Installation
+
+Requirements: **Python 3.12** (matches the version used in the `Dockerfile`). Some pinned dependencies (e.g. `PyYAML==6.0.1`) don't ship prebuilt wheels for newer Python versions, so using 3.12 avoids needing a C++ compiler.
+
+1. Clone the repository and move into it.
+2. Create and activate a virtual environment:
+
+   ```powershell
+   py -3.12 -m venv venv
+   venv\Scripts\activate
+   ```
+
+   ```bash
+   python3.12 -m venv venv
+   source venv/bin/activate
+   ```
+
+3. Install the dependencies:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## Execution
+
+Run the Flask development server:
+
+```bash
+python app.py
+```
+
+This starts the API on `http://127.0.0.1:5000` in debug mode.
+
+Available endpoints:
+
+- `GET /` — health check, returns `Hello World`.
+- `GET /getStars` — scrapes and returns the processed star data.
+
+To run it the way production does (via Gunicorn):
+
+```bash
+gunicorn app:app
+```
